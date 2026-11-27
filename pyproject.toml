@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling==1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aura"
+version = "0.1.0"
+description = "Server e client MCP che collegano i servizi AI agli impianti domotici Vimar tramite le KNX IoT 3rd Party API"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.14"
+authors = [{ name = "5ive Stars" }]
+dependencies = [
+    "fastmcp==4.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.2.0",
+    "pytest-cov==7.1.0",
+    "ruff==0.17.5",
+]
+
+[project.scripts]
+aura-server = "aura.__main__:main"
+aura-client = "aura.client:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aura"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=aura --cov-report=term-missing"
+
+[tool.coverage.run]
+branch = true
+source = ["aura"]
+
+[tool.coverage.report]
+fail_under = 75
+show_missing = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
