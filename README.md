@@ -20,7 +20,73 @@ Il prodotto si prova con un kit portatile di impianto View Wireless fornito da V
 
 Il gruppo lavora alla prima revisione di avanzamento, la Requirements and Technology Baseline (RTB), prevista entro il 2027-01-15. Per la RTB realizza un Proof of Concept (PoC) sui casi base: accesso all'impianto, elenco degli impianti e stato di una luce.
 
-Le istruzioni di installazione e di primo utilizzo saranno aggiunte a questo README insieme al codice del PoC.
+Oggi il server espone quattro strumenti in sola lettura (verifica dell'accesso, elenco degli impianti, elenco delle luci, stato di una luce) su un impianto simulato. L'adattatore verso le KNX IoT 3rd Party API è ancora da implementare.
+
+## Tecnologie
+
+- Python 3.14.
+- FastMCP 4.2.0 per il server e il client MCP, con la versione fissata in `pyproject.toml`.
+- Docker e Docker Compose.
+- pytest, pytest-cov e ruff per i test, la copertura e il controllo dello stile.
+
+## Avvio del PoC
+
+### Con Docker
+
+```bash
+docker compose up --build
+```
+
+Il server MCP risponde su `http://localhost:8000/mcp` e usa un impianto simulato con tre luci. Per cambiare la configurazione si copia `config.env.example` in `config.env` e lo si modifica: `config.env` è escluso da git e dall'immagine Docker.
+
+### Senza Docker, per lo sviluppo
+
+Serve Python 3.14.
+
+```bash
+python3.14 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+aura-server
+```
+
+In un altro terminale, con lo stesso ambiente attivo, il client MCP da riga di comando chiama gli strumenti del server:
+
+```bash
+aura-client tools
+aura-client call list_installations
+aura-client call list_lights --arg installation_id=kit-demo
+aura-client call get_light_state --arg installation_id=kit-demo --arg light_id=luce-1
+```
+
+### Controlli e test
+
+```bash
+ruff check .
+ruff format --check .
+pytest
+```
+
+`pytest` misura anche la copertura e fallisce sotto il 75%, la soglia minima del capitolato. Gli stessi controlli, più la build dell'immagine Docker, li esegue la GitHub Action **CI** a ogni pull request.
+
+## Struttura del codice
+
+```
+src/aura/
+├── server.py         server MCP: gli strumenti esposti al servizio AI
+├── gateway.py        interfaccia verso l'impianto, l'unica da cui dipende il server
+├── fake_gateway.py   impianto simulato in memoria, per lo sviluppo e i test
+├── knx_gateway.py    adattatore verso le KNX IoT 3rd Party API (da implementare)
+├── bootstrap.py      sceglie l'implementazione in base ad AURA_BACKEND
+├── config.py         configurazione dalle variabili d'ambiente
+├── domain.py         modello: impianti, luci, stato delle luci
+├── errors.py         errori del dominio
+├── client.py         client MCP da riga di comando (aura-client)
+└── __main__.py       avvio del server (aura-server)
+tests/                test con pytest
+```
+
+Il server riceve l'implementazione dell'impianto dall'esterno (dependency injection): per passare dall'impianto simulato a quello reale basta cambiare `AURA_BACKEND` in `config.env`.
 
 ## Documentazione di progetto
 

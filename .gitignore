@@ -1,0 +1,26 @@
+# Configurazione locale con i valori reali
+config.env
+
+# Ambienti virtuali
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Test, copertura e strumenti
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Sistema operativo ed editor
+.DS_Store
+.idea/
+.vscode/
